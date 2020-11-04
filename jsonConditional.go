@@ -8,34 +8,38 @@ import (
 	"time"
 )
 
+// ConditionalType represents the accepted conditional JSON types
 type ConditionalType int
 
+// LayoutISO is the current accepted DATE TIME format
 const LayoutISO = "2006-01-02 15:04:05"
 
 const (
+	// IBM conditional format
 	IBM ConditionalType = iota
+	// JSONLOGIC conditional format
 	JSONLOGIC
 )
 
-
+// ConditionalParser is the Interface that must be followed by the different parsers
 type ConditionalParser interface {
 	Parse(jsonLogic string) (query string, err error)
 }
 
-// https://www.ibm.com/support/knowledgecenter/SSEPEK_11.0.0/json/src/tpc/db2z_jsonqueryoperator.html
+// IBMCondition https://www.ibm.com/support/knowledgecenter/SSEPEK_11.0.0/json/src/tpc/db2z_jsonqueryoperator.html
 type IBMCondition struct {
 }
 
-// http://jsonlogic.com/operations.html
-type JsonLogicCondition struct {
+// JSONLogicCondition http://jsonlogic.com/operations.html
+type JSONLogicCondition struct {
 }
 
-// Factory of JSON Conditional parsers
+// New Factory of JSON Conditional parsers
 func New(t ConditionalType) ConditionalParser {
 	if t == IBM {
 		return IBMCondition{}
 	}
-	return JsonLogicCondition{}
+	return JSONLogicCondition{}
 }
 
 // -- IBM to SQL
@@ -390,7 +394,7 @@ func parseJSONLogicValue(key string, value interface{}) (query string, err error
 }
 
 // Parse input JSON Logic format to SQL conditional query
-func (j JsonLogicCondition) Parse(jsonLogic string) (query string, err error) {
+func (j JSONLogicCondition) Parse(jsonLogic string) (query string, err error) {
 	var raw map[string]interface{}
 	err = json.Unmarshal([]byte(jsonLogic), &raw)
 	for key, value := range raw {
